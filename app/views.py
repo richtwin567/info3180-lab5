@@ -35,8 +35,13 @@ def secure_page():
     """A secure page viewable only by logged in users"""
     return render_template("secure_page.html")
 
-
-
+@app.route("/logout")
+@login_required
+def logout():
+    """Logs out a logged in user"""
+    logout_user()
+    flash("You have been logged out successfully",'message')
+    return redirect(url_for('home'))
 
 
 @app.route("/login", methods=["GET", "POST"])
