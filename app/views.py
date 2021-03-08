@@ -40,7 +40,7 @@ def secure_page():
 def logout():
     """Logs out a logged in user"""
     logout_user()
-    flash("You have been logged out successfully",'message')
+    flash("You have been logged out successfully",'warning')
     return redirect(url_for('home'))
 
 
@@ -52,8 +52,8 @@ def login():
         # and not just one field
         if form.validate_on_submit():
             # Get the username and password values from the form.
-            username= form.username
-            password = form.password
+            username= form.username.data
+            password = form.password.data
             # using your model, query database for a user based on the username
             # and password submitted. Remember you need to compare the password hash.
             # You will need to import the appropriate function to do so.
@@ -61,19 +61,18 @@ def login():
             # passed to the login_user() method below.
             should_login = False
             user = UserProfile.query.filter_by(username=username).first()
+            
             if user:
                 should_login = check_password_hash(user.password, password)
+                # get user id, load into session
+                if should_login:
+                    login_user(user)
+                    flash("Login in successful", "success")
+                    return redirect(url_for("secure_page"))  # they should be redirected to a secure-page route instead
+                else:
+                    flash("Incorrect password for user", "danger")
             else:
-                flash(f"The user {username} does not exist", "error")
-            # get user id, load into session
-            if should_login:
-                login_user(user)
-                flash("Login in successful", "success")
-                return redirect(url_for("secure_page"))  # they should be redirected to a secure-page route instead
-            else:
-                flash("Incorrect password for user", "error")
-
-            # remember to flash a message to the user
+                flash(f"The user {username} does not exist", "danger")
     return render_template("login.html", form=form)
 
 
